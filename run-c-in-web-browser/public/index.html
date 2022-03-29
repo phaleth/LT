@@ -1,0 +1,31 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>WebAssembly Demo</title>
+</head>
+<body>
+    <h1>WebAssembly Demo</h1>
+    <script>
+        let wasm;
+        const importObject = {
+            env: {
+                numLog: console.log,
+                strLog: (offset, length) => {
+                    const strBuffer = new Uint8Array(wasm.instance.exports.memory.buffer
+                        , offset, length);
+                    const str = new TextDecoder('utf8').decode(strBuffer);
+                    console.log('Received a new string from C: ' + str);
+                }
+            }
+        };
+        (async () => {
+            wasm = await WebAssembly.instantiateStreaming(fetch('program.wasm')
+                , importObject);
+            wasm.instance.exports.greet();
+        })();
+    </script>
+</body>
+</html>
